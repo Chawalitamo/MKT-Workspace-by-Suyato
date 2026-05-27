@@ -102,6 +102,11 @@ textarea { min-height: 72px; resize: vertical; }
 .loading { text-align: center; padding: 32px; color: #bbb; font-size: 13px; }
 .del-btn { border: none; background: none; cursor: pointer; color: #ddd; font-size: 15px; padding: 0 4px; transition: color .15s; }
 .del-btn:hover { color: #D85A30; }
+.epill[draggable="true"] { cursor: grab; }
+.epill[draggable="true"]:active { opacity: 0.6; }
+.dentry[draggable="true"] { cursor: grab; }
+.dentry[draggable="true"]:active { opacity: 0.6; }
+.cal-cell.drag-over { background: #FFF0EA !important; outline: 2px dashed #D85A30; outline-offset: -2px; }
 .my-entries { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0; }
 @media(max-width:500px){ .cal-cell { min-height: 60px; padding: 3px; } .epill { font-size: 9px; } .tab-btn { padding: 12px 14px; font-size: 13px; } }
 </style>
@@ -445,10 +450,10 @@ function renderCal() {
     const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
     const evs = byDate[ds] || [];
     const shown = evs.slice(0,3), more = evs.length - 3;
-    html += `<div class="cal-cell${isToday?' today':''}"><div class="date-n${isToday?' td-c':''}">${d}</div>`;
+    html += `<div class="cal-cell${isToday?' today':''}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')"><div class="date-n${isToday?' td-c':''}">${d}</div>`;
     shown.forEach(e => {
       const lbl = (e.start_time ? e.start_time.slice(0,5)+' ':'') + e.title;
-      html += `<span class="epill p-${e.teammate}" title="${e.teammate}: ${e.title}">${lbl}</span>`;
+      html += `<span class="epill p-${e.teammate}" title="${e.teammate}: ${e.title}" draggable="true" ondragstart="dragStart(event,'${e.id}')">${lbl}</span>`;
     });
     if (more > 0) html += `<div class="more-b">+${more}</div>`;
     html += '</div>';
@@ -462,14 +467,44 @@ function renderDetail() {
   document.getElementById('detailList').innerHTML = d.map(e => {
     const time = e.start_time ? e.start_time.slice(0,5)+(e.end_time?'–'+e.end_time.slice(0,5):'') : '';
     const badge = e.brand ? `<span class="dbadge bb-${e.brand.replace(/\s/g,'')}">${e.brand}</span>` : '';
-    return `<div class="dentry">
+    return `<div class="dentry" draggable="true" ondragstart="dragStart(event,'${e.id}')">
       <div class="dav av-${e.teammate}">${e.teammate[0]}</div>
       <div class="di">
         <div class="di-t">${e.title}</div>
         <div class="di-m">${e.teammate} · ${e.event_date}${time?' · '+time:''}${e.event_type?' · '+e.event_type:''}${e.location?' · 📍'+e.location:''}</div>
         ${e.notes?`<div class="di-m" style="color:#bbb">${e.notes}</div>`:''}
-      </div>${badge}</div>`;
+      </div>${badge}
+      <button class="del-btn" onclick="calDelEntry(event,'${e.id}')">×</button></div>`;
   }).join('');
+}
+
+function dragStart(event, id) {
+  event.dataTransfer.setData('entryId', id);
+  event.dataTransfer.effectAllowed = 'move';
+}
+function calDragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  event.currentTarget.classList.add('drag-over');
+}
+function calDragLeave(event) {
+  event.currentTarget.classList.remove('drag-over');
+}
+async function dropOnDate(event, newDate) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drag-over');
+  const id = event.dataTransfer.getData('entryId');
+  if (!id) return;
+  const { error } = await sb.from('team_schedules').update({ event_date: newDate }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'err'); return; }
+  toast('Moved ✓', 'ok');
+  loadCalData();
+}
+async function calDelEntry(event, id) {
+  event.stopPropagation();
+  if (!confirm('Delete this entry?')) return;
+  await sb.from('team_schedules').delete().eq('id', id);
+  loadCalData(); toast('Deleted');
 }
 
 sb.channel('ts_live')
