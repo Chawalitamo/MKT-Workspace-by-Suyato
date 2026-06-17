@@ -69,9 +69,9 @@ textarea { min-height: 72px; resize: vertical; }
 .cal-head { display: grid; grid-template-columns: repeat(7,1fr); background: #1a1a1a; }
 .cal-head div { text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 700; color: #fff; }
 .cal-head div:nth-child(6), .cal-head div:nth-child(7) { background: #333; }
-.cal-body { display: grid; grid-template-columns: repeat(7,1fr); }
-.cal-cell { min-height: 90px; border-right: 1px solid #e8e8e8; border-bottom: 1px solid #e8e8e8; padding: 5px; }
-.cal-cell:nth-child(7n) { border-right: none; }
+.cal-body { display: grid; grid-template-columns: repeat(7,1fr); grid-auto-rows: minmax(90px,auto); }
+.cal-cell { border-right: 1px solid #e8e8e8; border-bottom: 1px solid #e8e8e8; padding: 5px; }
+.cal-cell.no-rborder { border-right: none; }
 .cal-cell.weekend { background: #f7f7f7; }
 .cal-cell.empty { background: #f4f4f4; }
 .cal-cell.today { background: #FFF8F5; }
@@ -415,43 +415,32 @@ function updateStats() {
 
 function renderCal() {
   const y = calDate.getFullYear(), m = calDate.getMonth();
-  const firstDay = (new Date(y, m, 1).getDay() + 6) % 7; // Monday = 0
-  const lastD = new Date(y, m+1, 0).getDate();
-  const prevLastD = new Date(y, m, 0).getDate();
-  const today = new Date();
+  const lastD  = new Date(y, m+1, 0).getDate();
+  const today  = new Date();
   const byDate = {};
   getFiltered().forEach(e => { (byDate[e.event_date] = byDate[e.event_date]||[]).push(e); });
 
+  // Convert JS getDay() (0=Sun…6=Sat) → CSS grid column (1=Mon…7=Sun, Mon-first)
+  const toCol = dow => (dow + 6) % 7 + 1;
+
   let html = '';
-  // Leading grey dates from previous month
-  for (let i = 0; i < firstDay; i++) {
-    const pd = prevLastD - firstDay + 1 + i;
-    const pdDow = new Date(y, m - 1, pd).getDay(); // 0=Sun, 6=Sat
-    const wknd = (pdDow === 0 || pdDow === 6) ? ' weekend' : '';
-    html += `<div class="cal-cell empty${wknd}"><div class="date-n" style="color:#ccc">${pd}</div></div>`;
-  }
-  // Current month days
   for (let d = 1; d <= lastD; d++) {
-    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-    const dow = new Date(y, m, d).getDay(); // 0=Sun, 1=Mon … 6=Sat
-    const isWeekend = dow === 0 || dow === 6;
-    const evs = byDate[ds] || [];
-    const shown = evs.slice(0,3), more = evs.length - 3;
-    html += `<div class="cal-cell${isToday?' today':(isWeekend?' weekend':'')}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')"><div class="date-n${isToday?' td-c':''}">${d}</div>`;
+    const ds     = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday= today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+    const dow    = new Date(y, m, d).getDay();  // 0=Sun … 6=Sat
+    const col    = toCol(dow);                  // 1=Mon … 7=Sun
+    const isWknd = dow === 0 || dow === 6;
+    const noRB   = col === 7 ? ' no-rborder' : '';
+    const evs    = byDate[ds] || [];
+    const shown  = evs.slice(0,3), more = evs.length - 3;
+    html += `<div class="cal-cell${isToday?' today':(isWknd?' weekend':'')}${noRB}" style="grid-column:${col}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')">`;
+    html += `<div class="date-n${isToday?' td-c':''}">${d}</div>`;
     shown.forEach(e => {
       const lbl = (e.start_time ? e.start_time.slice(0,5)+' ':'') + e.title;
       html += `<span class="epill p-${e.teammate}" title="${e.teammate}: ${e.title}" draggable="true" ondragstart="dragStart(event,'${e.id}')">${lbl}</span>`;
     });
     if (more > 0) html += `<div class="more-b">+${more}</div>`;
     html += '</div>';
-  }
-  // Trailing grey dates from next month (fill out last row)
-  const trailingDays = (7 - ((firstDay + lastD) % 7)) % 7;
-  for (let i = 1; i <= trailingDays; i++) {
-    const trailDow = new Date(y, m + 1, i).getDay(); // 0=Sun, 6=Sat
-    const wknd = (trailDow === 0 || trailDow === 6) ? ' weekend' : '';
-    html += `<div class="cal-cell empty${wknd}"><div class="date-n" style="color:#ccc">${i}</div></div>`;
   }
   document.getElementById('calBody').innerHTML = html || '<div style="grid-column:1/-1" class="loading">No entries this month</div>';
 }
