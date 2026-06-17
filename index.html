@@ -7,13 +7,15 @@
 <script src="./index_files/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI',Arial,sans-serif; background: #f5f4f0; min-height: 100vh; }
+body { font-family: 'Segoe UI',Arial,sans-serif; background: #f0efeb; min-height: 100vh; }
 .tab-bar { display: flex; background: #1a1a1a; padding: 0 1.5rem; position: sticky; top: 0; z-index: 100; }
 .tab-btn { padding: 14px 20px; color: #888; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
 .tab-btn.active { color: #fff; border-bottom-color: #D85A30; }
 .tab-btn:hover:not(.active) { color: #ccc; }
 .page { display: none; }
 .page.active { display: block; }
+
+/* ─── ENTRY PAGE ──────────────────────────────────────── */
 .form-wrap { max-width: 540px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
 .card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1rem; }
 .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #aaa; margin-bottom: 12px; }
@@ -33,9 +35,9 @@ textarea { min-height: 72px; resize: vertical; }
 .brand-btn { padding: 7px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; font-size: 13px; font-weight: 600; cursor: pointer; background: #fafafa; color: #555; transition: all 0.15s; }
 .brand-btn.active { border-color: transparent; }
 .b-CJX.active { background: #E8A000; color: #fff; }
-.b-TD.active { background: #5C2D0A; color: #fff; }
-.b-Cafe.active { background: #185FA5; color: #fff; }
-.b-HR.active { background: #3BA55C; color: #fff; }
+.b-TD.active  { background: #5C2D0A; color: #fff; }
+.b-Cafe.active{ background: #185FA5; color: #fff; }
+.b-HR.active  { background: #3BA55C; color: #fff; }
 .b-OPR.active { background: #533AB7; color: #fff; }
 .b-Others.active { background: #555; color: #fff; }
 .others-input { margin-top: 8px; display: none; }
@@ -44,80 +46,158 @@ textarea { min-height: 72px; resize: vertical; }
 .submit-btn { width: 100%; padding: 14px; background: #D85A30; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.15s; font-family: inherit; margin-top: 0.25rem; }
 .submit-btn:hover { background: #b84a24; }
 .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+.my-entries { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0; }
+
+/* ─── TOAST ───────────────────────────────────────────── */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999; }
 .toast.show { opacity: 1; }
-.toast.ok { background: #0F6E56; }
+.toast.ok  { background: #0F6E56; }
 .toast.err { background: #A32D2D; }
-.cal-wrap { padding: 1rem 1rem 3rem; max-width: 1000px; margin: 0 auto; }
-.cal-topbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; }
-.cal-topbar h2 { font-size: 18px; font-weight: 700; color: #1a1a1a; }
-.nav-row { display: flex; align-items: center; gap: 8px; }
-.nav-btn { width: 32px; height: 32px; border: 1.5px solid #e0e0e0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-.nav-btn:hover { background: #eee; }
-.month-lbl { font-size: 15px; font-weight: 700; color: #1a1a1a; min-width: 160px; text-align: center; }
-.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: center; }
-.fchip { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; font-size: 13px; cursor: pointer; font-weight: 600; background: #fff; color: #555; transition: all 0.15s; }
-.fchip.f-all.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
-.fchip.f-Toon.active { background: #D85A30; border-color: #D85A30; color: #fff; }
-.fchip.f-Wit.active { background: #3BA55C; border-color: #3BA55C; color: #fff; }
-.fchip.f-Ju.active { background: #185FA5; border-color: #185FA5; color: #fff; }
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(110px,1fr)); gap: 8px; margin-bottom: 1rem; }
-.stat-c { background: #fff; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #eee; }
-.stat-n { font-size: 22px; font-weight: 700; }
-.stat-l { font-size: 11px; color: #888; margin-top: 2px; }
-.cal-grid-wrap { background: #fff; border-radius: 14px; overflow: hidden; border: 1px solid #eee; margin-bottom: 1rem; }
-.cal-head { display: grid; grid-template-columns: repeat(7,1fr); background: #1a1a1a; }
-.cal-head div { text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 700; color: #fff; }
-.cal-head div:nth-child(6), .cal-head div:nth-child(7) { background: #333; }
-.cal-body { display: grid; grid-template-columns: repeat(7,1fr); grid-auto-rows: minmax(90px,auto); }
-.cal-cell { border-right: 1px solid #e8e8e8; border-bottom: 1px solid #e8e8e8; padding: 5px; }
-.cal-cell.no-rborder { border-right: none; }
-.cal-cell.weekend { background: #f7f7f7; }
-.cal-cell.empty { background: #f4f4f4; }
-.cal-cell.today { background: #FFF8F5; }
-.date-n { font-size: 11px; font-weight: 700; color: #bbb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 3px; }
-.date-n.td-c { background: #D85A30; color: #fff; }
-.epill { font-size: 10px; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default; max-width: 100%; font-weight: 600; line-height: 1.5; display: block; }
-.p-Toon { background: #FAECE7; color: #993C1D; }
-.p-Wit { background: #EAF3DE; color: #27500A; }
-.p-Ju { background: #E6F1FB; color: #0C447C; }
-.more-b { font-size: 10px; color: #ccc; padding-left: 2px; }
-.detail-section { background: #fff; border-radius: 14px; border: 1px solid #eee; padding: 1.25rem; }
-.sec-hd { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; margin-bottom: 12px; }
-.dentry { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-radius: 8px; margin-bottom: 6px; border: 1px solid #f0f0f0; background: #fafafa; }
-.dav { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
-.av-Toon { background: #F5C4B3; color: #993C1D; }
-.av-Wit { background: #C0DD97; color: #27500A; }
-.av-Ju { background: #B5D4F4; color: #0C447C; }
-.di { flex: 1; min-width: 0; }
-.di-t { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-.di-m { font-size: 11px; color: #888; margin-top: 2px; }
-.dbadge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; flex-shrink: 0; }
-.bb-CJX { background: #FFF0CC; color: #855009; }
-.bb-TD { background: #EEE5DC; color: #3D1F08; }
-.bb-Cafe { background: #E6F1FB; color: #0C447C; }
-.bb-HR { background: #EAF3DE; color: #27500A; }
-.bb-OPR { background: #EEE8FC; color: #3C3489; }
-.bb-Others { background: #f0f0f0; color: #555; }
+
+/* ─── CALENDAR PAGE ───────────────────────────────────── */
+.cal-wrap { padding: 1rem 1rem 4rem; max-width: 1100px; margin: 0 auto; }
+
+/* Top control bar */
+.cal-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 0.9rem;
+  background: #fff; border-radius: 14px; padding: 12px 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05); border: 1px solid #eee;
+}
+.cal-title-area { display: flex; align-items: center; gap: 10px; }
+.cal-topbar h2 { font-size: 18px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.3px; }
+.live-badge { font-size: 11px; color: #3BA55C; font-weight: 700; display: flex; align-items: center; gap: 4px; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #3BA55C; display: inline-block; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-.loading { text-align: center; padding: 32px; color: #bbb; font-size: 13px; }
-.del-btn { border: none; background: none; cursor: pointer; color: #ddd; font-size: 15px; padding: 0 4px; transition: color .15s; }
-.del-btn:hover { color: #D85A30; }
+.nav-controls { display: flex; align-items: center; gap: 6px; }
+.nav-btn { width: 32px; height: 32px; border: 1.5px solid #e8e8e8; border-radius: 8px; background: #f9f9f9; cursor: pointer; font-size: 17px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: #555; }
+.nav-btn:hover { background: #efefef; border-color: #ccc; }
+.month-lbl { font-size: 15px; font-weight: 800; color: #1a1a1a; min-width: 148px; text-align: center; }
+.today-btn { padding: 5px 12px; border: 1.5px solid #e0e0e0; border-radius: 8px; background: #fff; cursor: pointer; font-size: 12px; font-weight: 600; color: #666; transition: all 0.15s; font-family: inherit; }
+.today-btn:hover { border-color: #D85A30; color: #D85A30; background: #FFF5F2; }
+
+/* Filter + stats row */
+.filter-stats-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 0.9rem; }
+.filter-chips { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.filter-chips span { font-size: 12px; color: #bbb; font-weight: 600; }
+.fchip { padding: 5px 14px; border-radius: 20px; border: 1.5px solid #e0e0e0; font-size: 12px; cursor: pointer; font-weight: 700; background: #fff; color: #666; transition: all 0.15s; }
+.fchip.f-all.active   { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+.fchip.f-Toon.active  { background: #D85A30; border-color: #D85A30; color: #fff; }
+.fchip.f-Wit.active   { background: #3BA55C; border-color: #3BA55C; color: #fff; }
+.fchip.f-Ju.active    { background: #185FA5; border-color: #185FA5; color: #fff; }
+.mini-stats { display: flex; gap: 12px; }
+.mstat { display: flex; align-items: center; gap: 5px; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 5px 10px; }
+.mstat-n { font-size: 16px; font-weight: 800; }
+.mstat-l { font-size: 10px; color: #aaa; font-weight: 600; }
+
+/* Calendar grid */
+.cal-grid-wrap {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  border: 1px solid #e8e8e8; margin-bottom: 1rem;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.cal-head { display: grid; grid-template-columns: repeat(7,1fr); }
+.cal-head div {
+  text-align: center; padding: 10px 4px; font-size: 11px; font-weight: 700;
+  color: #fff; background: #222; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.cal-head div:nth-child(6),
+.cal-head div:nth-child(7) { background: #3a3a3a; color: #b0b0b0; }
+.cal-body { display: grid; grid-template-columns: repeat(7,1fr); grid-auto-rows: minmax(110px,auto); }
+.cal-cell { border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 6px 5px; position: relative; }
+.cal-cell.no-rborder { border-right: none; }
+.cal-cell.weekend { background: #fafaf8; }
+.cal-cell.today   { background: #FFF8F4; border-top: 2px solid #D85A30; }
+.cal-cell.drag-over { background: #FFF0EA !important; outline: 2px dashed #D85A30; outline-offset: -2px; }
+.date-n {
+  font-size: 12px; font-weight: 700; color: #ccc;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px; transition: background 0.1s;
+}
+.date-n.has-ev { color: #555; }
+.date-n.td-c   { background: #D85A30; color: #fff; }
+
+/* Event pills */
+.epill {
+  font-size: 10px; padding: 2px 5px 2px 7px; border-radius: 4px;
+  margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; max-width: 100%; font-weight: 600;
+  line-height: 1.5; display: block; border-left: 2px solid transparent;
+}
+.p-Toon { background: #FAECE7; color: #993C1D; border-left-color: #D85A30; }
+.p-Wit  { background: #EAF3DE; color: #27500A; border-left-color: #3BA55C; }
+.p-Ju   { background: #E6F1FB; color: #0C447C; border-left-color: #185FA5; }
 .epill[draggable="true"] { cursor: grab; }
 .epill[draggable="true"]:active { opacity: 0.6; }
+.more-b { font-size: 10px; color: #ccc; padding-left: 4px; margin-top: 2px; }
+
+/* Work log section */
+.detail-section { background: #fff; border-radius: 14px; border: 1px solid #eee; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+.detail-section-hd {
+  padding: 13px 16px; border-bottom: 1px solid #f2f2f2;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sec-hd { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #aaa; }
+.detail-inner { padding: 10px 12px 4px; }
+.loading { text-align: center; padding: 32px; color: #bbb; font-size: 13px; }
+
+/* Date group headers */
+.date-group { margin-bottom: 10px; }
+.dg-hd {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 0 7px; border-bottom: 1px solid #f4f4f4; margin-bottom: 5px;
+}
+.dg-day {
+  background: #1a1a1a; color: #fff; border-radius: 5px;
+  padding: 2px 7px; font-size: 10px; font-weight: 800; letter-spacing: 0.04em;
+}
+.dg-day.wknd { background: #888; }
+.dg-date { font-size: 12px; font-weight: 700; color: #555; }
+.dg-count { font-size: 10px; color: #bbb; margin-left: auto; }
+
+/* Log entries */
+.dentry {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 10px; border-radius: 8px; margin-bottom: 4px;
+  border: 1px solid #f0f0f0; background: #fafafa;
+  transition: background 0.12s, border-color 0.12s;
+}
+.dentry:hover { background: #f4f4f4; border-color: #e8e8e8; }
 .dentry[draggable="true"] { cursor: grab; }
 .dentry[draggable="true"]:active { opacity: 0.6; }
-.cal-cell.drag-over { background: #FFF0EA !important; outline: 2px dashed #D85A30; outline-offset: -2px; }
-.my-entries { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0; }
-@media(max-width:500px){ .cal-cell { min-height: 60px; padding: 3px; } .epill { font-size: 9px; } .tab-btn { padding: 12px 14px; font-size: 13px; } }
+.dav { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.av-Toon { background: #F5C4B3; color: #993C1D; }
+.av-Wit  { background: #C0DD97; color: #27500A; }
+.av-Ju   { background: #B5D4F4; color: #0C447C; }
+.di { flex: 1; min-width: 0; }
+.di-t { font-size: 13px; font-weight: 600; color: #1a1a1a; line-height: 1.3; }
+.di-m { font-size: 11px; color: #999; margin-top: 2px; line-height: 1.5; }
+.di-time { font-size: 10px; font-weight: 700; color: #666; background: #efefef; border-radius: 4px; padding: 1px 5px; margin-right: 4px; }
+.dbadge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; flex-shrink: 0; align-self: flex-start; margin-top: 2px; }
+.bb-CJX    { background: #FFF0CC; color: #855009; }
+.bb-TD     { background: #EEE5DC; color: #3D1F08; }
+.bb-Cafe   { background: #E6F1FB; color: #0C447C; }
+.bb-HR     { background: #EAF3DE; color: #27500A; }
+.bb-OPR    { background: #EEE8FC; color: #3C3489; }
+.bb-Others { background: #f0f0f0; color: #555; }
+.del-btn { border: none; background: none; cursor: pointer; color: #ddd; font-size: 15px; padding: 0 4px; transition: color .15s; }
+.del-btn:hover { color: #D85A30; }
+
+@media(max-width:600px){
+  .cal-cell { padding: 3px 2px; }
+  .epill { font-size: 9px; padding: 1px 4px 1px 6px; }
+  .tab-btn { padding: 12px 14px; font-size: 13px; }
+  .mini-stats { display: none; }
+  .cal-body { grid-auto-rows: minmax(70px,auto); }
+}
 </style>
 </head>
 <body>
 
 <div class="tab-bar">
-  <div class="tab-btn active" onclick="switchTab(&#39;entry&#39;,this)">📝 Log Work</div>
-  <div class="tab-btn" onclick="switchTab(&#39;calendar&#39;,this)">📅 Team Calendar</div>
+  <div class="tab-btn active" onclick="switchTab('entry',this)">📝 Log Work</div>
+  <div class="tab-btn" onclick="switchTab('calendar',this)">📅 Team Calendar</div>
 </div>
 
 <!-- ENTRY PAGE -->
@@ -180,11 +260,11 @@ textarea { min-height: 72px; resize: vertical; }
   <div class="card">
     <div class="card-title">Brand</div>
     <div class="brand-row">
-      <div class="brand-btn b-CJX" data-brand="CJX" onclick="selectBrand(this)">CJX</div>
-      <div class="brand-btn b-TD" data-brand="TD" onclick="selectBrand(this)">TD</div>
-      <div class="brand-btn b-Cafe" data-brand="Cafe" onclick="selectBrand(this)">Cafe</div>
-      <div class="brand-btn b-HR" data-brand="HR" onclick="selectBrand(this)">HR</div>
-      <div class="brand-btn b-OPR" data-brand="OPR" onclick="selectBrand(this)">OPR</div>
+      <div class="brand-btn b-CJX"    data-brand="CJX"    onclick="selectBrand(this)">CJX</div>
+      <div class="brand-btn b-TD"     data-brand="TD"     onclick="selectBrand(this)">TD</div>
+      <div class="brand-btn b-Cafe"   data-brand="Cafe"   onclick="selectBrand(this)">Cafe</div>
+      <div class="brand-btn b-HR"     data-brand="HR"     onclick="selectBrand(this)">HR</div>
+      <div class="brand-btn b-OPR"    data-brand="OPR"    onclick="selectBrand(this)">OPR</div>
       <div class="brand-btn b-Others" data-brand="Others" onclick="selectBrand(this)">Others</div>
     </div>
     <div class="others-input" id="others-input">
@@ -205,42 +285,58 @@ textarea { min-height: 72px; resize: vertical; }
 <!-- CALENDAR PAGE -->
 <div id="page-calendar" class="page">
 <div class="cal-wrap">
+
+  <!-- Top control bar -->
   <div class="cal-topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
+    <div class="cal-title-area">
       <h2>Team Calendar</h2>
-      <span style="font-size:11px;color:#3BA55C;font-weight:700;display:flex;align-items:center;gap:4px;">
-        <span class="live-dot"></span>LIVE
-      </span>
+      <span class="live-badge"><span class="live-dot"></span>LIVE</span>
     </div>
-    <div class="nav-row">
+    <div class="nav-controls">
+      <button class="today-btn" onclick="jumpToToday()">Today</button>
       <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
       <div class="month-lbl" id="monthLbl">June 2026</div>
       <button class="nav-btn" onclick="changeMonth(1)">›</button>
     </div>
   </div>
-  <div class="filter-row">
-    <span style="font-size:12px;color:#aaa;">Show:</span>
-    <div class="fchip f-all active" data-f="all" onclick="setFilter(this)">All</div>
-    <div class="fchip f-Toon" data-f="Toon" onclick="setFilter(this)">Toon</div>
-    <div class="fchip f-Wit" data-f="Wit" onclick="setFilter(this)">Wit</div>
-    <div class="fchip f-Ju" data-f="Ju" onclick="setFilter(this)">Ju</div>
+
+  <!-- Filter chips + mini stats -->
+  <div class="filter-stats-row">
+    <div class="filter-chips">
+      <span>Show:</span>
+      <div class="fchip f-all active" data-f="all"  onclick="setFilter(this)">All</div>
+      <div class="fchip f-Toon"       data-f="Toon" onclick="setFilter(this)">Toon</div>
+      <div class="fchip f-Wit"        data-f="Wit"  onclick="setFilter(this)">Wit</div>
+      <div class="fchip f-Ju"         data-f="Ju"   onclick="setFilter(this)">Ju</div>
+    </div>
+    <div class="mini-stats">
+      <div class="mstat"><div class="mstat-n" id="s-total">—</div><div class="mstat-l">Total</div></div>
+      <div class="mstat"><div class="mstat-n" style="color:#D85A30" id="s-toon">—</div><div class="mstat-l">Toon</div></div>
+      <div class="mstat"><div class="mstat-n" style="color:#3BA55C" id="s-wit">—</div><div class="mstat-l">Wit</div></div>
+      <div class="mstat"><div class="mstat-n" style="color:#185FA5" id="s-ju">—</div><div class="mstat-l">Ju</div></div>
+    </div>
   </div>
-  <div class="stats-row">
-    <div class="stat-c"><div class="stat-n" id="s-total">4</div><div class="stat-l">Total</div></div>
-    <div class="stat-c"><div class="stat-n" style="color:#D85A30" id="s-toon">0</div><div class="stat-l">Toon</div></div>
-    <div class="stat-c"><div class="stat-n" style="color:#3BA55C" id="s-wit">4</div><div class="stat-l">Wit</div></div>
-    <div class="stat-c"><div class="stat-n" style="color:#185FA5" id="s-ju">0</div><div class="stat-l">Ju</div></div>
-  </div>
+
+  <!-- Calendar grid -->
   <div class="cal-grid-wrap">
     <div class="cal-head">
       <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
     </div>
-    <div class="cal-body" id="calBody"><div style="grid-column:1/-1" class="loading">Loading…</div></div>
+    <div class="cal-body" id="calBody">
+      <div style="grid-column:1/-1" class="loading">Loading…</div>
+    </div>
   </div>
+
+  <!-- Work log (grouped by date) -->
   <div class="detail-section">
-    <div class="sec-hd">This Month's Work Log</div>
-    <div id="detailList"><div class="loading">Loading…</div></div>
+    <div class="detail-section-hd">
+      <div class="sec-hd">Work Log — <span id="logMonthLbl"></span></div>
+    </div>
+    <div class="detail-inner" id="detailList">
+      <div class="loading">Loading…</div>
+    </div>
   </div>
+
 </div>
 </div>
 
@@ -252,11 +348,14 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 
 let selectedTM = null, selectedBrand = null;
-let calDate = new Date(2026, 5, 1);
+let calDate = new Date(); calDate.setDate(1);   // default = this month
 let calData = [], calFilter = 'all';
 
-const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+/* ── TAB / TOAST ─────────────────────────────────────── */
 function switchTab(tab, el) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -264,55 +363,44 @@ function switchTab(tab, el) {
   document.getElementById('page-' + tab).classList.add('active');
   if (tab === 'calendar') loadCalData();
 }
-
 function toast(msg, type='') {
   const t = document.getElementById('toast');
   t.textContent = msg; t.className = 'toast show ' + type;
   setTimeout(() => t.className = 'toast', 2800);
 }
 
+/* ── ENTRY PAGE ─────────────────────────────────────── */
 function selectTM(el) {
   document.querySelectorAll('.tm-pill').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  selectedTM = el.dataset.name;
+  el.classList.add('active'); selectedTM = el.dataset.name;
   loadMyEntries();
   document.getElementById('myEntriesSection').style.display = 'block';
 }
-
 function selectBrand(el) {
   document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  selectedBrand = el.dataset.brand;
+  el.classList.add('active'); selectedBrand = el.dataset.brand;
   document.getElementById('others-input').className = 'others-input' + (selectedBrand === 'Others' ? ' show' : '');
 }
-
 function syncDateTo() {
   const from = document.getElementById('date_from').value;
   const to = document.getElementById('date_to');
   if (from && (!to.value || to.value < from)) to.value = from;
   to.min = from;
 }
-
 function getBrand() {
   if (!selectedBrand) return null;
-  if (selectedBrand === 'Others') {
-    const v = document.getElementById('others_name').value.trim();
-    return v || 'Others';
-  }
+  if (selectedBrand === 'Others') { const v = document.getElementById('others_name').value.trim(); return v || 'Others'; }
   return selectedBrand;
 }
-
 async function submitEntry() {
   if (!selectedTM) return toast('Please select a team member', 'err');
   const dateFrom = document.getElementById('date_from').value;
-  const dateTo = document.getElementById('date_to').value || dateFrom;
-  const title = document.getElementById('title').value.trim();
+  const dateTo   = document.getElementById('date_to').value || dateFrom;
+  const title    = document.getElementById('title').value.trim();
   if (!dateFrom) return toast('Please select a date', 'err');
-  if (!title) return toast('Please enter a task title', 'err');
-
+  if (!title)    return toast('Please enter a task title', 'err');
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = 'Saving...';
-
   const rows = [];
   let cur = new Date(dateFrom + 'T00:00:00');
   const end = new Date(dateTo + 'T00:00:00');
@@ -321,44 +409,34 @@ async function submitEntry() {
       teammate: selectedTM,
       event_date: cur.toISOString().slice(0,10),
       start_time: document.getElementById('start_time').value || null,
-      end_time: document.getElementById('end_time').value || null,
-      title,
-      brand: getBrand(),
+      end_time:   document.getElementById('end_time').value || null,
+      title, brand: getBrand(),
       event_type: document.getElementById('event_type').value.trim() || null,
-      location: document.getElementById('location').value.trim() || null,
-      notes: document.getElementById('notes').value.trim() || null,
+      location:   document.getElementById('location').value.trim() || null,
+      notes:      document.getElementById('notes').value.trim() || null,
     });
     cur.setDate(cur.getDate() + 1);
   }
-
   const { error } = await sb.from('team_schedules').insert(rows);
   btn.disabled = false; btn.textContent = '✓ Save Schedule';
-
   if (error) return toast('Error: ' + error.message, 'err');
-  const dayCount = rows.length;
-  toast('Saved' + (dayCount > 1 ? ' ' + dayCount + ' days' : '') + ' ✓', 'ok');
-
+  toast('Saved' + (rows.length > 1 ? ' ' + rows.length + ' days' : '') + ' ✓', 'ok');
   ['date_from','date_to','start_time','end_time','title','event_type','location','notes','others_name']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  document.getElementById('date_from').value = '2026-06-01';
-  document.getElementById('date_to').value = '2026-06-01';
+  document.getElementById('date_from').value = dateFrom; // keep last date as hint
+  document.getElementById('date_to').value   = dateFrom;
   document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('others-input').className = 'others-input';
-  selectedBrand = null;
-  loadMyEntries();
+  selectedBrand = null; loadMyEntries();
 }
-
 const brandColor = { CJX:'#E8A000', TD:'#5C2D0A', Cafe:'#185FA5', HR:'#3BA55C', OPR:'#533AB7', Others:'#888' };
-
 async function loadMyEntries() {
   if (!selectedTM) return;
   const list = document.getElementById('myEntriesList');
   list.innerHTML = '<div class="loading">Loading...</div>';
-  const { data } = await sb.from('team_schedules')
-    .select('*').eq('teammate', selectedTM)
-    .gte('event_date','2026-06-01')
-    .order('event_date', { ascending: false }).limit(8);
-  if (!data || data.length === 0) { list.innerHTML = '<div class="loading" style="padding:16px">No entries yet</div>'; return; }
+  const { data } = await sb.from('team_schedules').select('*').eq('teammate', selectedTM)
+    .gte('event_date','2026-06-01').order('event_date', { ascending: false }).limit(8);
+  if (!data || !data.length) { list.innerHTML = '<div class="loading" style="padding:16px">No entries yet</div>'; return; }
   list.innerHTML = data.map(e => `
     <div class="dentry">
       <div style="width:8px;height:8px;border-radius:50%;background:${brandColor[e.brand]||'#ccc'};margin-top:5px;flex-shrink:0"></div>
@@ -369,15 +447,21 @@ async function loadMyEntries() {
       <button class="del-btn" onclick="delEntry('${e.id}')">×</button>
     </div>`).join('');
 }
-
 async function delEntry(id) {
   if (!confirm('Delete this entry?')) return;
   await sb.from('team_schedules').delete().eq('id', id);
   loadMyEntries(); toast('Deleted');
 }
 
+/* ── CALENDAR ────────────────────────────────────────── */
 function updateMonthLbl() {
-  document.getElementById('monthLbl').textContent = months[calDate.getMonth()] + ' ' + calDate.getFullYear();
+  const label = MONTHS[calDate.getMonth()] + ' ' + calDate.getFullYear();
+  document.getElementById('monthLbl').textContent = label;
+  document.getElementById('logMonthLbl').textContent = label;
+}
+function jumpToToday() {
+  calDate = new Date(); calDate.setDate(1);
+  loadCalData();
 }
 function changeMonth(d) {
   calDate = new Date(calDate.getFullYear(), calDate.getMonth() + d, 1);
@@ -385,34 +469,32 @@ function changeMonth(d) {
 }
 function setFilter(el) {
   document.querySelectorAll('.fchip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  calFilter = el.dataset.f;
+  el.classList.add('active'); calFilter = el.dataset.f;
   renderCal(); renderDetail();
 }
 function getFiltered() {
   return calFilter === 'all' ? calData : calData.filter(e => e.teammate === calFilter);
 }
-
 async function loadCalData() {
   updateMonthLbl();
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const start = `${y}-${String(m+1).padStart(2,'0')}-01`;
   const lastD = new Date(y, m+1, 0).getDate();
-  const end = `${y}-${String(m+1).padStart(2,'0')}-${lastD}`;
+  const end   = `${y}-${String(m+1).padStart(2,'0')}-${lastD}`;
   const { data } = await sb.from('team_schedules').select('*')
     .gte('event_date', start).lte('event_date', end)
     .order('event_date').order('start_time');
   calData = data || [];
   updateStats(); renderCal(); renderDetail();
 }
-
 function updateStats() {
   document.getElementById('s-total').textContent = calData.length;
-  document.getElementById('s-toon').textContent = calData.filter(e=>e.teammate==='Toon').length;
-  document.getElementById('s-wit').textContent = calData.filter(e=>e.teammate==='Wit').length;
-  document.getElementById('s-ju').textContent = calData.filter(e=>e.teammate==='Ju').length;
+  document.getElementById('s-toon').textContent  = calData.filter(e=>e.teammate==='Toon').length;
+  document.getElementById('s-wit').textContent   = calData.filter(e=>e.teammate==='Wit').length;
+  document.getElementById('s-ju').textContent    = calData.filter(e=>e.teammate==='Ju').length;
 }
 
+/* ── RENDER CALENDAR GRID ────────────────────────────── */
 function renderCal() {
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const lastD  = new Date(y, m+1, 0).getDate();
@@ -420,48 +502,80 @@ function renderCal() {
   const byDate = {};
   getFiltered().forEach(e => { (byDate[e.event_date] = byDate[e.event_date]||[]).push(e); });
 
-  // Convert JS getDay() (0=Sun…6=Sat) → CSS grid column (1=Mon…7=Sun, Mon-first)
+  // JS getDay() 0=Sun…6=Sat  →  CSS grid column 1=Mon…7=Sun
   const toCol = dow => (dow + 6) % 7 + 1;
 
   let html = '';
   for (let d = 1; d <= lastD; d++) {
-    const ds     = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const isToday= today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-    const dow    = new Date(y, m, d).getDay();  // 0=Sun … 6=Sat
-    const col    = toCol(dow);                  // 1=Mon … 7=Sun
-    const isWknd = dow === 0 || dow === 6;
-    const noRB   = col === 7 ? ' no-rborder' : '';
-    const evs    = byDate[ds] || [];
-    const shown  = evs.slice(0,3), more = evs.length - 3;
+    const ds      = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+    const dow     = new Date(y, m, d).getDay();
+    const col     = toCol(dow);
+    const isWknd  = dow === 0 || dow === 6;
+    const noRB    = col === 7 ? ' no-rborder' : '';
+    const evs     = byDate[ds] || [];
+    const shown   = evs.slice(0, 3), more = evs.length - 3;
+    const hasEv   = evs.length > 0 ? ' has-ev' : '';
     html += `<div class="cal-cell${isToday?' today':(isWknd?' weekend':'')}${noRB}" style="grid-column:${col}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')">`;
-    html += `<div class="date-n${isToday?' td-c':''}">${d}</div>`;
+    html += `<div class="date-n${isToday?' td-c':hasEv}">${d}</div>`;
     shown.forEach(e => {
       const lbl = (e.start_time ? e.start_time.slice(0,5)+' ':'') + e.title;
       html += `<span class="epill p-${e.teammate}" title="${e.teammate}: ${e.title}" draggable="true" ondragstart="dragStart(event,'${e.id}')">${lbl}</span>`;
     });
-    if (more > 0) html += `<div class="more-b">+${more}</div>`;
+    if (more > 0) html += `<div class="more-b">+${more} more</div>`;
     html += '</div>';
   }
   document.getElementById('calBody').innerHTML = html || '<div style="grid-column:1/-1" class="loading">No entries this month</div>';
 }
 
+/* ── RENDER WORK LOG (grouped by date) ───────────────── */
 function renderDetail() {
-  const d = getFiltered();
-  if (!d.length) { document.getElementById('detailList').innerHTML = '<div class="loading">No entries this month</div>'; return; }
-  document.getElementById('detailList').innerHTML = d.map(e => {
-    const time = e.start_time ? e.start_time.slice(0,5)+(e.end_time?'–'+e.end_time.slice(0,5):'') : '';
-    const badge = e.brand ? `<span class="dbadge bb-${e.brand.replace(/\s/g,'')}">${e.brand}</span>` : '';
-    return `<div class="dentry" draggable="true" ondragstart="dragStart(event,'${e.id}')">
-      <div class="dav av-${e.teammate}">${e.teammate[0]}</div>
-      <div class="di">
-        <div class="di-t">${e.title}</div>
-        <div class="di-m">${e.teammate} · ${e.event_date}${time?' · '+time:''}${e.event_type?' · '+e.event_type:''}${e.location?' · 📍'+e.location:''}</div>
-        ${e.notes?`<div class="di-m" style="color:#bbb">${e.notes}</div>`:''}
-      </div>${badge}
-      <button class="del-btn" onclick="calDelEntry(event,'${e.id}')">×</button></div>`;
-  }).join('');
+  const entries = getFiltered();
+  const container = document.getElementById('detailList');
+  if (!entries.length) { container.innerHTML = '<div class="loading">No entries this month</div>'; return; }
+
+  // Group by date
+  const groups = {};
+  entries.forEach(e => { (groups[e.event_date] = groups[e.event_date]||[]).push(e); });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(date => {
+    const dt      = new Date(date + 'T12:00:00');
+    const dayName = DAYS_SHORT[dt.getDay()];
+    const isWknd  = dt.getDay() === 0 || dt.getDay() === 6;
+    const dateStr = MONTHS_SHORT[dt.getMonth()] + ' ' + dt.getDate();
+    const items   = groups[date];
+
+    html += `<div class="date-group">
+      <div class="dg-hd">
+        <span class="dg-day${isWknd?' wknd':''}">${dayName}</span>
+        <span class="dg-date">${dateStr}</span>
+        <span class="dg-count">${items.length} task${items.length>1?'s':''}</span>
+      </div>`;
+
+    items.forEach(e => {
+      const time  = e.start_time ? e.start_time.slice(0,5)+(e.end_time?'–'+e.end_time.slice(0,5):'') : '';
+      const badge = e.brand ? `<span class="dbadge bb-${e.brand.replace(/\s/g,'')}">${e.brand}</span>` : '';
+      html += `<div class="dentry" draggable="true" ondragstart="dragStart(event,'${e.id}')">
+        <div class="dav av-${e.teammate}">${e.teammate[0]}</div>
+        <div class="di">
+          <div class="di-t">${e.title}</div>
+          <div class="di-m">
+            ${time?`<span class="di-time">${time}</span>`:''}
+            ${e.teammate}${e.event_type?' · '+e.event_type:''}${e.location?' · 📍'+e.location:''}
+          </div>
+          ${e.notes?`<div class="di-m" style="color:#bbb;margin-top:2px">${e.notes}</div>`:''}
+        </div>${badge}
+        <button class="del-btn" onclick="calDelEntry(event,'${e.id}')">×</button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
 }
 
+/* ── DRAG & DROP ─────────────────────────────────────── */
 function dragStart(event, id) {
   event.dataTransfer.setData('entryId', id);
   event.dataTransfer.effectAllowed = 'move';
@@ -481,8 +595,7 @@ async function dropOnDate(event, newDate) {
   if (!id) return;
   const { error } = await sb.from('team_schedules').update({ event_date: newDate }).eq('id', id);
   if (error) { toast('Error: ' + error.message, 'err'); return; }
-  toast('Moved ✓', 'ok');
-  loadCalData();
+  toast('Moved ✓', 'ok'); loadCalData();
 }
 async function calDelEntry(event, id) {
   event.stopPropagation();
@@ -491,6 +604,7 @@ async function calDelEntry(event, id) {
   loadCalData(); toast('Deleted');
 }
 
+/* ── REALTIME ────────────────────────────────────────── */
 sb.channel('ts_live')
   .on('postgres_changes', { event:'*', schema:'public', table:'team_schedules' }, () => {
     if (document.getElementById('page-calendar').classList.contains('active')) loadCalData();
@@ -498,14 +612,14 @@ sb.channel('ts_live')
   })
   .subscribe();
 
-document.getElementById('date_from').min = '2026-06-01';
-document.getElementById('date_from').value = '2026-06-01';
-document.getElementById('date_to').min = '2026-06-01';
-document.getElementById('date_to').value = '2026-06-01';
+/* ── INIT ────────────────────────────────────────────── */
+const todayStr = new Date().toISOString().slice(0,10);
+document.getElementById('date_from').min   = '2026-06-01';
+document.getElementById('date_from').value = todayStr > '2026-06-01' ? todayStr : '2026-06-01';
+document.getElementById('date_to').min     = '2026-06-01';
+document.getElementById('date_to').value   = document.getElementById('date_from').value;
 
-// Pre-render calendar on page load so it's ready when the tab is opened
 loadCalData();
 </script>
-
 
 </body></html>
