@@ -439,12 +439,18 @@ function renderCal() {
   const y = calDate.getFullYear(), m = calDate.getMonth();
   const firstDay = new Date(y, m, 1).getDay();
   const lastD = new Date(y, m+1, 0).getDate();
+  const prevLastD = new Date(y, m, 0).getDate();
   const today = new Date();
   const byDate = {};
   getFiltered().forEach(e => { (byDate[e.event_date] = byDate[e.event_date]||[]).push(e); });
 
   let html = '';
-  for (let i = 0; i < firstDay; i++) html += '<div class="cal-cell empty"></div>';
+  // Leading grey dates from previous month
+  for (let i = 0; i < firstDay; i++) {
+    const pd = prevLastD - firstDay + 1 + i;
+    html += `<div class="cal-cell empty"><div class="date-n" style="color:#ccc">${pd}</div></div>`;
+  }
+  // Current month days
   for (let d = 1; d <= lastD; d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
@@ -457,6 +463,11 @@ function renderCal() {
     });
     if (more > 0) html += `<div class="more-b">+${more}</div>`;
     html += '</div>';
+  }
+  // Trailing grey dates from next month (fill out last row)
+  const trailingDays = (7 - ((firstDay + lastD) % 7)) % 7;
+  for (let i = 1; i <= trailingDays; i++) {
+    html += `<div class="cal-cell empty"><div class="date-n" style="color:#ccc">${i}</div></div>`;
   }
   document.getElementById('calBody').innerHTML = html || '<div style="grid-column:1/-1" class="loading">No entries this month</div>';
 }
