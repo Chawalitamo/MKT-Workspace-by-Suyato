@@ -497,26 +497,30 @@ function updateStats() {
 /* ── RENDER CALENDAR GRID ────────────────────────────── */
 function renderCal() {
   const y = calDate.getFullYear(), m = calDate.getMonth();
-  const lastD  = new Date(y, m+1, 0).getDate();
-  const today  = new Date();
-  const byDate = {};
+  const lastD       = new Date(y, m+1, 0).getDate();
+  const today       = new Date();
+  const byDate      = {};
   getFiltered().forEach(e => { (byDate[e.event_date] = byDate[e.event_date]||[]).push(e); });
 
-  // JS getDay() 0=Sun…6=Sat  →  CSS grid column 1=Mon…7=Sun
-  const toCol = dow => (dow + 6) % 7 + 1;
+  // Mon-first column: JS getDay() 0=Sun…6=Sat → CSS col 1=Mon…7=Sun
+  const toCol       = dow => (dow + 6) % 7 + 1;
+  // How many blank columns before day 1 (0 for Monday-start, up to 6 for Sunday-start)
+  const firstColMon = (new Date(y, m, 1).getDay() + 6) % 7;
 
   let html = '';
   for (let d = 1; d <= lastD; d++) {
     const ds      = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-    const dow     = new Date(y, m, d).getDay();
-    const col     = toCol(dow);
+    const dow     = new Date(y, m, d).getDay();          // 0=Sun … 6=Sat
+    const col     = toCol(dow);                          // 1=Mon … 7=Sun
+    const row     = Math.floor((firstColMon + d - 1) / 7) + 1; // calendar row (1-based)
     const isWknd  = dow === 0 || dow === 6;
     const noRB    = col === 7 ? ' no-rborder' : '';
     const evs     = byDate[ds] || [];
     const shown   = evs.slice(0, 3), more = evs.length - 3;
     const hasEv   = evs.length > 0 ? ' has-ev' : '';
-    html += `<div class="cal-cell${isToday?' today':(isWknd?' weekend':'')}${noRB}" style="grid-column:${col}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')">`;
+    // Use BOTH grid-column and grid-row so auto-placement cannot put a cell in the wrong slot
+    html += `<div class="cal-cell${isToday?' today':(isWknd?' weekend':'')}${noRB}" style="grid-column:${col};grid-row:${row}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')">`;
     html += `<div class="date-n${isToday?' td-c':hasEv}">${d}</div>`;
     shown.forEach(e => {
       const lbl = (e.start_time ? e.start_time.slice(0,5)+' ':'') + e.title;
