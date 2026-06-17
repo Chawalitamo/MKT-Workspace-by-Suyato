@@ -235,35 +235,11 @@ textarea { min-height: 72px; resize: vertical; }
     <div class="cal-head">
       <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
     </div>
-    <div class="cal-body" id="calBody"><div class="cal-cell"><div class="date-n">1</div><span class="epill p-Wit" title="Wit: xxx">xxx</span></div><div class="cal-cell"><div class="date-n">2</div><span class="epill p-Wit" title="Wit: xxx">xxx</span></div><div class="cal-cell"><div class="date-n">3</div><span class="epill p-Wit" title="Wit: xxx">xxx</span></div><div class="cal-cell"><div class="date-n">4</div><span class="epill p-Wit" title="Wit: xxx">xxx</span></div><div class="cal-cell"><div class="date-n">5</div></div><div class="cal-cell"><div class="date-n">6</div></div><div class="cal-cell"><div class="date-n">7</div></div><div class="cal-cell"><div class="date-n">8</div></div><div class="cal-cell"><div class="date-n">9</div></div><div class="cal-cell"><div class="date-n">10</div></div><div class="cal-cell"><div class="date-n">11</div></div><div class="cal-cell"><div class="date-n">12</div></div><div class="cal-cell"><div class="date-n">13</div></div><div class="cal-cell"><div class="date-n">14</div></div><div class="cal-cell"><div class="date-n">15</div></div><div class="cal-cell"><div class="date-n">16</div></div><div class="cal-cell"><div class="date-n">17</div></div><div class="cal-cell"><div class="date-n">18</div></div><div class="cal-cell"><div class="date-n">19</div></div><div class="cal-cell"><div class="date-n">20</div></div><div class="cal-cell"><div class="date-n">21</div></div><div class="cal-cell"><div class="date-n">22</div></div><div class="cal-cell"><div class="date-n">23</div></div><div class="cal-cell"><div class="date-n">24</div></div><div class="cal-cell"><div class="date-n">25</div></div><div class="cal-cell"><div class="date-n">26</div></div><div class="cal-cell"><div class="date-n">27</div></div><div class="cal-cell"><div class="date-n">28</div></div><div class="cal-cell"><div class="date-n">29</div></div><div class="cal-cell"><div class="date-n">30</div></div></div>
+    <div class="cal-body" id="calBody"><div style="grid-column:1/-1" class="loading">Loading…</div></div>
   </div>
   <div class="detail-section">
     <div class="sec-hd">This Month's Work Log</div>
-    <div id="detailList"><div class="dentry">
-      <div class="dav av-Wit">W</div>
-      <div class="di">
-        <div class="di-t">xxx</div>
-        <div class="di-m">Wit · 2026-06-01 · xxxxx · 📍xxxxx</div>
-        <div class="di-m" style="color:#bbb">xxxx</div>
-      </div><span class="dbadge bb-OPR">OPR</span></div><div class="dentry">
-      <div class="dav av-Wit">W</div>
-      <div class="di">
-        <div class="di-t">xxx</div>
-        <div class="di-m">Wit · 2026-06-02 · xxxxx · 📍xxxxx</div>
-        <div class="di-m" style="color:#bbb">xxxx</div>
-      </div><span class="dbadge bb-OPR">OPR</span></div><div class="dentry">
-      <div class="dav av-Wit">W</div>
-      <div class="di">
-        <div class="di-t">xxx</div>
-        <div class="di-m">Wit · 2026-06-03 · xxxxx · 📍xxxxx</div>
-        <div class="di-m" style="color:#bbb">xxxx</div>
-      </div><span class="dbadge bb-OPR">OPR</span></div><div class="dentry">
-      <div class="dav av-Wit">W</div>
-      <div class="di">
-        <div class="di-t">xxx</div>
-        <div class="di-m">Wit · 2026-06-04 · xxxxx · 📍xxxxx</div>
-        <div class="di-m" style="color:#bbb">xxxx</div>
-      </div><span class="dbadge bb-OPR">OPR</span></div></div>
+    <div id="detailList"><div class="loading">Loading…</div></div>
   </div>
 </div>
 </div>
@@ -450,16 +426,16 @@ function renderCal() {
   // Leading grey dates from previous month
   for (let i = 0; i < firstDay; i++) {
     const pd = prevLastD - firstDay + 1 + i;
-    const col = i; // 0=Mon in Mon-first
-    const wknd = col >= 5 ? ' weekend' : '';
+    const pdDow = new Date(y, m - 1, pd).getDay(); // 0=Sun, 6=Sat
+    const wknd = (pdDow === 0 || pdDow === 6) ? ' weekend' : '';
     html += `<div class="cal-cell empty${wknd}"><div class="date-n" style="color:#ccc">${pd}</div></div>`;
   }
   // Current month days
   for (let d = 1; d <= lastD; d++) {
     const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-    const col = (firstDay + d - 1) % 7; // 0=Mon … 5=Sat 6=Sun
-    const isWeekend = col >= 5;
+    const dow = new Date(y, m, d).getDay(); // 0=Sun, 1=Mon … 6=Sat
+    const isWeekend = dow === 0 || dow === 6;
     const evs = byDate[ds] || [];
     const shown = evs.slice(0,3), more = evs.length - 3;
     html += `<div class="cal-cell${isToday?' today':(isWeekend?' weekend':'')}" ondragover="calDragOver(event)" ondragleave="calDragLeave(event)" ondrop="dropOnDate(event,'${ds}')"><div class="date-n${isToday?' td-c':''}">${d}</div>`;
@@ -473,8 +449,8 @@ function renderCal() {
   // Trailing grey dates from next month (fill out last row)
   const trailingDays = (7 - ((firstDay + lastD) % 7)) % 7;
   for (let i = 1; i <= trailingDays; i++) {
-    const col = (firstDay + lastD + i - 1) % 7;
-    const wknd = col >= 5 ? ' weekend' : '';
+    const trailDow = new Date(y, m + 1, i).getDay(); // 0=Sun, 6=Sat
+    const wknd = (trailDow === 0 || trailDow === 6) ? ' weekend' : '';
     html += `<div class="cal-cell empty${wknd}"><div class="date-n" style="color:#ccc">${i}</div></div>`;
   }
   document.getElementById('calBody').innerHTML = html || '<div style="grid-column:1/-1" class="loading">No entries this month</div>';
@@ -537,6 +513,9 @@ document.getElementById('date_from').min = '2026-06-01';
 document.getElementById('date_from').value = '2026-06-01';
 document.getElementById('date_to').min = '2026-06-01';
 document.getElementById('date_to').value = '2026-06-01';
+
+// Pre-render calendar on page load so it's ready when the tab is opened
+loadCalData();
 </script>
 
 
